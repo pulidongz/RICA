@@ -5,7 +5,9 @@ import moment from 'moment';
 
 dotenv.config({path: '.env'});
 
-export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "111", "112", "253"]
+// export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "111", "112", "253"]
+//! no credentials for 111, 112
+export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "253"]
 // export const MACHINE_ARR = ["64", "94", "253"]
 export const ssh = new NodeSSH();
 
