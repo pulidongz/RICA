@@ -1,4 +1,4 @@
-import { app, MACHINE_ARR } from "../..";
+import { app } from "../..";
 
 export function CustomMsgs(){
 
@@ -19,14 +19,15 @@ export function CustomMsgs(){
     });
 
     // Answers to 'hello' messages
-    app.message(/^(help|tulong|how|elp).*/, async ({ message, say }) => {
+    app.message(/^(help|tulong|how|elp|info).*/, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
-                    "type": "section",
+                    "type": "header",
                     "text": {
-                        "type": "mrkdwn",
-                        "text": "*Essential Bot Commands:*"
+                        "type": "plain_text",
+                        "text": "Essential Bot Commands",
+                        "emoji": true
                     }
                 },
                 {
@@ -36,42 +37,37 @@ export function CustomMsgs(){
                     "type": "section",
                     "fields": [
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: help\n- Displays this message",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *help | tulong | how | elp | info*\n-Displays help message",
                         },
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: check-script [host_id]\n- Checks if script(s) are running on the specified host",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *check-script [host_id]*\n-Checks if script(s) are running on the specified host",
                         },
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: reboot [host_id]\n- Reboots the specified host",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *reboot [host_id]*\n-Reboots the specified host",
                         },
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: kill-script [host_id] [script]\n- Kills the specified script on the specified host",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *kill-script [host_id] [script]*\n-Kills the specified script on the specified host",
                         },
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: start-script [host_id] [script]\n- Starts the specified script on the specified host",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *start-script [host_id] [script]*\n-Starts/restarts the specified script on the specified host",
                         },
                         {
-                            "type": "plain_text",
-                            "text": ":black_small_square: run-init\n- Runs the init script on all hosts",
-                            "emoji": true
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *run-init*\n-Runs the init script on all hosts",
                         },
                     ]
                 },
                 {
-                    "type": "section",
+                    "type": "header",
                     "text": {
-                        "type": "mrkdwn",
-                        "text": "\n*Link Requests:*"
+                        "type": "plain_text",
+                        "text": "Link Requests",
+                        "emoji": true
                     }
                 },
                 {
@@ -79,38 +75,36 @@ export function CustomMsgs(){
                 },
                 {
                     "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":small_blue_diamond: gdrive-si \n<https://drive.google.com/drive/folders/1hmMn45vOhGkaA_2xQ38_75b5NinIcV8v|SI - Google Drive>",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":small_blue_diamond: trello-creds \n<https://trello.com/c/QYVi1EmO/100-updated-server-credentials-september-2022|Trello: Machine Credentials>",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":small_blue_diamond: trello-dev \n<https://trello.com/b/OWVJeuBw/01-development-tickets-current|Trello Development Tickets>",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":small_blue_diamond: trello-docu \n<https://trello.com/b/Mvx7eGvP/02-documentation|Trello Documentation>",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": ":small_blue_diamond: trello-mo \n<https://trello.com/b/PeWcVmy7/00-monitoring-operations-2022|Trello Monitoring Operations 2022>",
-                    }
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *gdrive-si* \n<https://drive.google.com/drive/folders/1hmMn45vOhGkaA_2xQ38_75b5NinIcV8v|SI - Google Drive>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-creds* \n<https://trello.com/c/QYVi1EmO/100-updated-server-credentials-september-2022|Trello: Machine Credentials>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-dev* \n<https://trello.com/b/OWVJeuBw/01-development-tickets-current|Trello Development Tickets>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-docu* \n<https://trello.com/b/Mvx7eGvP/02-documentation|Trello Documentation>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-mo* \n<https://trello.com/b/PeWcVmy7/00-monitoring-operations-2022|Trello Monitoring Operations 2022>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-cbewsl* \n<https://trello.com/b/6S4vV0in/01-cbewsl|Trello CBEWSL 2022>",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_blue_diamond: *trello-main* \n<https://trello.com/b/KRfbDHyr/00-main-2022|Trello Main 2022>",
+                        },
+                    ]
                 },
             ],
             text: "fallback text message"

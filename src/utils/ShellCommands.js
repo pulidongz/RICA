@@ -1,4 +1,4 @@
-import { MACHINE_ARR } from "../../";
+import { MACHINE_ARR } from "../../instance/config";
 import child_process from 'child_process';
 import { NodeSSH } from "node-ssh";
 import moment from 'moment';
@@ -18,8 +18,11 @@ export function execShellCommand(cmd){
     });
 }
 
+/*
+ * Checks if "host_id" is a valid machine
+ */
 export function checkIfValidMachine(machine){
-    if(machine !== "all" && !MACHINE_ARR.includes(machine))
+    if(machine !== "all" && !Object.keys(MACHINE_ARR).includes(machine))
         return ({
             status: false, data: `Machine ${machine} does not exist`
         });
@@ -28,6 +31,22 @@ export function checkIfValidMachine(machine){
     });
 }
 
+/*
+ * Checks if "script" matches to a valid script in the machine
+ */
+export function checkIfValidScript(machine, script){
+    if(!(MACHINE_ARR[machine].scripts).includes(script))
+        return ({
+            status: false, data: `Script ${script} does not exist`
+        });
+    return ({
+        status: true, data: `Script ${script} exists`
+    });
+}
+
+/*
+ * Obtain credentials from .env file
+ */
 export function getCredentials(machine){
     switch(machine){
         case "64":
@@ -96,6 +115,9 @@ export function getCredentials(machine){
     }
 }
 
+/*
+ * Checks all / specific runnning scripts on the specified machine
+ */
 export async function checkRunningScripts(machine){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let response = "";
@@ -130,6 +152,9 @@ export async function checkRunningScripts(machine){
     return response;
 }
 
+/*
+ * Reboots specified machine then re-runs scripts on crontab
+ */
 export async function rebootMachine(machine){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let ts = moment();
@@ -174,6 +199,9 @@ export async function rebootMachine(machine){
     return response;
 }
 
+/*
+ * Kills specific script on specified machine
+ */
 export async function killScript(machine, script){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let response = "";
@@ -215,7 +243,9 @@ export async function killScript(machine, script){
     return response;
 }
 
-// Starts/Restarts running script on machine
+/*
+ * Start / Restart running script(s) on specified machine
+ */
 export async function startScript(machine, script){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let response = "";
@@ -230,57 +260,74 @@ export async function startScript(machine, script){
         console.log(`Connected to ${hostname}!`);
         await ssh.execCommand("screen -ls")
         .then((resp) => {
-            response = resp;
+            response = resp.stdout;
+            console.log("screen_output:",response);
         });
     })
-    .then(() => {
-        if(response.stdout.includes("No Sockets found")){
-            response = `No scripts running on ${hostname}`;
+    .then(async() => {
+        if(response.includes("No Sockets found")){
+            response = `No scripts running on ${hostname}. Starting script *${script}*`;
         } else {
-            response = "Restarted existing screen sockets!";
+            response = `Restarted script *${script}* on *${hostname}* successfully`;
         }
     })
     .then(async() => {
+        await ssh.execCommand(`screen -wipe`)
+        await ssh.execCommand(`screen -S ${script} -Q echo '$PID'`)
+        .then(async(result) => {
+            console.log("screen_process_id: ",result, result.stdout);
+
+            await ssh.execCommand(`screen -S ${result.stdout} -X quit`)
+            // Restart script
+    .then(async() => {
         switch (script) {
-            // Globe GSM server
-            case "g5":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            case "t1":
+                // *Test script p1.py
+                console.log("starting t1");
+                await ssh.execCommand(`screen -dmS ${script} /usr/bin/python /home/pi/t1.py`)
                 break;
-            case "g7":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            case "t2":
+                // *Test script p2.py
+                await ssh.execCommand(`screen -dmS ${script} /usr/bin/python /home/pi/t2.py`)
                 break;
-            //Smart GSM Server
-            case "g4":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-                break;
-            case "g6":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-                break;
-            //!! Test using Sandbox, change to MIA during deployment
-            case "g5":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-                break;
-            case "g7":
-                // Run python script in screen
-                await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-                break;
+            // // Globe GSM server
+            // case "g5":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
+            // case "g7":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
+            // //Smart GSM Server
+            // case "g4":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
+            // case "g6":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
+            // //!! Test using Sandbox, change to MIA during deployment
+            // case "g5":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
+            // case "g7":
+            //     // Run python script in screen
+            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
+            //     break;
             default:
                 break;
         }
-
-
         await ssh.execCommand(`screen -dmS ${script} -X quit && screen -dmS ${script}`)
             .finally(() => {
                 console.log("Disconnected \n");
                 ssh.dispose();
             });
     });
+        })
+    })
     
-
     return response;
 }

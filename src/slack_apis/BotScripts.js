@@ -1,9 +1,9 @@
-import { app, MACHINE_ARR } from "../..";
-// import { startScript } from "../components/Scripts";
+import { app, } from "../..";
+import { MACHINE_ARR } from "../../instance/config";
 import { 
     checkIfValidMachine, 
-    getCredentials, 
     checkRunningScripts,
+    checkIfValidScript,
     rebootMachine,
     killScript,
     startScript, 
@@ -11,7 +11,6 @@ import {
 
 
 export function BotScripts() {
-
     /*
      * Checks if script(s) are running on the machine
      */
@@ -35,7 +34,7 @@ export function BotScripts() {
         } else {
             try {
                 if(machine === "all"){
-                    for(const m of MACHINE_ARR){   
+                    for(const m of Object.keys(MACHINE_ARR)){   
                         const result = await checkRunningScripts(m);
                         await say(result);
                     }
@@ -166,7 +165,7 @@ export function BotScripts() {
 
         console.log(command, machine, script);
 
-        let isValid = checkIfValidMachine(machine);
+        let isValid = checkIfValidMachine(machine) && checkIfValidScript(machine, script);
 
         if(!isValid.status){
             await say({
@@ -184,7 +183,7 @@ export function BotScripts() {
         } else {
             try {
                 const result = await startScript(machine, script);
-                console.log('RESULT: ', result);
+                console.log(result);
                 await say(result);
                 
             } catch (error) {

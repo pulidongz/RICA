@@ -1,19 +1,13 @@
-const { App } = require('@slack/bolt');
 import { NodeSSH } from 'node-ssh';
+import { CustomMsgs } from './src/slack_apis/BotCustomMsgs';
+import { BotScripts } from './src/slack_apis/BotScripts';
 import dotenv from 'dotenv';
 
 dotenv.config({path: '.env'});
 
-// export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "111", "112", "253"]
-//! no credentials for 111, 112
-export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "253"]
-export const ssh = new NodeSSH();
+const { App } = require('@slack/bolt');
 
-
-import { CustomMsgs } from './src/slack_apis/BotCustomMsgs';
-import { BotScripts } from './src/slack_apis/BotScripts';
-
-// Initializes your app with your bot token and signing secret
+// Initialize app with bot token and signin secret
 export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -22,11 +16,13 @@ export const app = new App({
   port: process.env.PORT || 5000,
 });
 
+export const ssh = new NodeSSH();
+
 CustomMsgs();
 BotScripts();
 
 (async () => {
-  // Start your app
+  // Start app
   await app.start();
 
   console.log(`${process.env.BOT_NAME} is running on port ${process.env.PORT}`);
