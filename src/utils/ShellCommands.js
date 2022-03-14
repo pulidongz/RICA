@@ -24,7 +24,7 @@ export function execShellCommand(cmd){
 export function checkIfValidMachine(machine){
     if(machine !== "all" && !Object.keys(MACHINE_ARR).includes(machine))
         return ({
-            status: false, data: `Machine ${machine} does not exist`
+            status: false, data: `Sorry, machine ${machine} does not exist`
         });
     return ({
         status: true, data: `Machine ${machine} exists`

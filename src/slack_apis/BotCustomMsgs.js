@@ -42,6 +42,10 @@ export function CustomMsgs(){
                         },
                         {
                             "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *machine-creds [host_id]*\n-Displays credentials of the specified host",
+                        },
+                        {
+                            "type": "mrkdwn",
                             "text": ":small_orange_diamond: *check-script [host_id]*\n-Checks if script(s) are running on the specified host",
                         },
                         {
@@ -111,7 +115,7 @@ export function CustomMsgs(){
         });
     });
 
-    // Answers to SI Google Drive inquiries
+    // Answers to SI Google Drive inquiry
     app.message(/^(gdrive-si).*/, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -127,7 +131,7 @@ export function CustomMsgs(){
         });
     });
 
-    // Answers to 'credential' inquiries
+    // Answers to 'credential' inquiry
     app.message(/^(trello-creds).*/, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -150,7 +154,7 @@ export function CustomMsgs(){
         });
     });
 
-    // Answers to Trello SI Dev 'tickets' inquiries
+    // Answers to Trello SI Dev 'tickets' inquiry
     app.message(/^(trello-dev).*/, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -166,7 +170,7 @@ export function CustomMsgs(){
         });
     });
 
-    // Answers to Trello SI 'documentation' inquiries
+    // Answers to Trello SI 'documentation' inquiry
     app.message(/^(trello-docu).*/, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -182,7 +186,7 @@ export function CustomMsgs(){
         });
     });
 
-    // Answers to Trello 'monitoring operations' inquiries
+    // Answers to Trello 'monitoring operations' inquiry
     app.message(/^(trello-mo).*/, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -191,6 +195,38 @@ export function CustomMsgs(){
                     "text": {
                         "type": "mrkdwn",
                         "text": "Link to <https://trello.com/b/PeWcVmy7/00-monitoring-operations-2022|Trello Monitoring Operations 2022>",
+                    }
+                }
+            ],
+            text: `Hey there <@${message.user}>! :wave:`
+        });
+    });
+
+    // Answers to Trello CBEWSL inquiry
+    app.message(/^(trello-cbewsl).*/, async ({ message, say }) => {
+        await say({
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Link to <https://trello.com/b/6S4vV0in/01-cbewsl|Trello CBEWSL 2022>",
+                    }
+                }
+            ],
+            text: `Hey there <@${message.user}>! :wave:`
+        });
+    });
+
+    // Answers to Trello Main inquiry
+    app.message(/^(trello-main).*/, async ({ message, say }) => {
+        await say({
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Link to <https://trello.com/b/KRfbDHyr/00-main-2022|Trello Main 2022>",
                     }
                 }
             ],

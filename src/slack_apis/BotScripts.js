@@ -1,6 +1,7 @@
 import { app, } from "../..";
 import { MACHINE_ARR } from "../../instance/config";
 import { 
+    getCredentials,
     checkIfValidMachine, 
     checkRunningScripts,
     checkIfValidScript,
@@ -11,6 +12,55 @@ import {
 
 
 export function BotScripts() {
+    /*
+     * Displays machine credentials
+     */
+    app.message(/^(machine-creds).*/, async ({ message, say }) => {
+        let machine = message.text.trim().split(" ")[1];
+        let isValid = checkIfValidMachine(machine);
+
+        if(!isValid.status){
+            await say({
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": `${isValid.data} :dizzy_face:`
+                        }
+                    },
+                ],
+                text: "fallback text message"
+            });
+        } else {
+            try {
+                if(machine === "all"){
+                    for(const m of Object.keys(MACHINE_ARR)){   
+                        const { hostname, ip, user, pass } = getCredentials(m);
+                        await say(`*${hostname}*\nIP: ${ip}\nUser: ${user}\nPass: ${pass}`);
+                    }
+                } else {
+                    const { hostname, ip, user, pass } = getCredentials(machine);
+                    await say(`*${hostname}*\nIP: ${ip}\nUser: ${user}\nPass: ${pass}`);
+                }
+            } catch (error) {
+                console.log(error);
+                await say({
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": `${error}`
+                            }
+                        },
+                    ],
+                    text: "fallback text message"
+                });
+            }
+        }
+    });
+
     /*
      * Checks if script(s) are running on the machine
      */
