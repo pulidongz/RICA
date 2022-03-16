@@ -49,6 +49,13 @@ export function checkIfValidScript(machine, script){
  */
 export function getCredentials(machine){
     switch(machine){
+        case "50":
+            return {
+                hostname: "Rack Server (Main)",
+                ip: process.env.RACK_SERVER_IP,
+                user: process.env.RACK_SERVER_USER,
+                pass: process.env.RACK_SERVER_PASS
+            };
         case "64":
             return {
                 hostname: "COARE Instance",

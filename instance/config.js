@@ -1,6 +1,9 @@
 // *export const MACHINE_ARR = ["64", "91", "92", "93", "94", "110", "111", "112", "253"]
 //! 111, 112 removed due to lack of credental
 export const MACHINE_ARR = {
+    "50":{
+      scripts: []
+    },
     "64":{
         scripts: ["backend"]
     },
