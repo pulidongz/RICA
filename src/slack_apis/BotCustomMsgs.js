@@ -10,7 +10,7 @@ export function CustomMsgs(){
                 "type": "section",
                 "text": {
                 "type": "mrkdwn",
-                "text": `Hey there <@${message.user}>! :wave:`
+                "text": `Hey there <@${message.user}>! :wave: How may I help you?`
                 },
             }
             ],
@@ -43,6 +43,10 @@ export function CustomMsgs(){
                         {
                             "type": "mrkdwn",
                             "text": ":small_orange_diamond: *machine-creds [host_id]*\n-Displays credentials of the specified host",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *remote-creds*\n-Displays AnyDesk / Teamviewer credentials of the specified host",
                         },
                         {
                             "type": "mrkdwn",

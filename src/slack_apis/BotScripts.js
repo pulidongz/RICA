@@ -12,6 +12,42 @@ import {
 
 
 export function BotScripts() {
+    app.message(/^(remote-creds).*/, async ({ message, say }) => {
+        await say({
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*TeamViewer*\n1225737909 - Monitoring PC \n543148747 - Meryll PC \n522698723 - Brain PC \n1790639411 - Gene PC \n1575800062 - Chad \n pass: senslope"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Anydesk*\n858418785 - Monitoring PC \n697682235 - Brain PC \n163339330 - Gene PC \n594080318 - Chad PC \ndyna-meryll@ad - Meryll PC \npass: s3nslope"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "\n634703210 - Dyna Server \npass: dyn4sl0p32020 \n877283734 - Kevin PC \npass: softwareinfra"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "for more information, please visit: <https://trello.com/c/WeqRFkwK/15-teamviewer-accounts-for-monitoring|Trello>",
+                    }
+                }
+            ],
+            text: `Hey there <@${message.user}>! :wave:`
+        });
+    });
+
     /*
      * Displays machine credentials
      */

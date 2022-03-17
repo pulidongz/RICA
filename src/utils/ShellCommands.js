@@ -162,6 +162,7 @@ export async function checkRunningScripts(machine){
 /*
  * Reboots specified machine then re-runs scripts on crontab
  */
+// !! Currently not working on sandbox-server :'(
 export async function rebootMachine(machine){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let ts = moment();
@@ -177,12 +178,13 @@ export async function rebootMachine(machine){
     .then(async() => {
         console.log(`Connected to ${hostname}!`);
 
-        await ssh.execCommand(`sudo reboot`)
-        .then(() => {
-            console.log("Disconnected \n");
-            ssh.dispose();
-        });
+        await ssh.execCommand(`sudo reboot`);
     })
+    .finally(() => {
+        console.log("Disconnected \n");
+        ssh.dispose();
+    });
+
 
     // todo: check if reboot was successful using ping, then ssh to machine to confirm if it's up
     // Second SSH to check if machine is online
