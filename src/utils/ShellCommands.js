@@ -277,14 +277,14 @@ export async function startScript(machine, script){
         if(response.includes("No Sockets found")){
             response = `No scripts running on ${hostname}. Starting script *${script}*`;
         } else {
-            response = `Restarted script *${script}* on *${hostname}* successfully`;
+            response = `Restarting script *${script}* on *${hostname}*...`;
         }
     })
     .then(async() => {
         await ssh.execCommand(`screen -wipe`)
         await ssh.execCommand(`screen -S ${script} -Q echo '$PID'`)
         .then(async(result) => {
-            console.log("screen_process_id: ",result, result.stdout);
+            console.log("screen_process_id: ", result.stdout);
 
             await ssh.execCommand(`screen -S ${result.stdout} -X quit`)
             // Restart script
@@ -299,33 +299,30 @@ export async function startScript(machine, script){
                 // *Test script p2.py
                 await ssh.execCommand(`screen -dmS ${script} /usr/bin/python /home/pi/t2.py`)
                 break;
-            // // Globe GSM server
-            // case "g5":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
-            // case "g7":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
-            // //Smart GSM Server
-            // case "g4":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
-            // case "g6":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
-            // //!! Test using Sandbox, change to MIA during deployment
-            // case "g5":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
-            // case "g7":
-            //     // Run python script in screen
-            //     await ssh.execCommand(`screen -dmS ${script} /home/pi/g5/g5.py`)
-            //     break;
+            // Sandbox Server | MIA Server => Highcharts
+            case "highcharts_server":
+                await ssh.execCommand(`screen -dmS ${script} bash -c "highcharts-export-server -enableServer 1"`)
+                break;
+            // Sandbox Server | MIA Server => Flask
+            case "flask_server":
+                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; /home/mia/miniconda3/bin/python run.py -ew"`)
+                break;
+            // Sandbox Server | MIA Server => Celery-Beat
+            case "beat_celery":
+                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; celery beat -A launch_worker.CELERY -l info -eag -er -egd"`)
+                break;
+            // Sandbox Server | MIA Server => Celery-Worker
+            case "worker_celery":
+                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; celery worker -A launch_worker.CELERY -l info -c 8 -eag -ec -er --purge"`)
+                break;
+            // 91, 92
+            case "g5" || "g7" || "g4" || "g6":
+                await ssh.execCommand(`/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -mloggers -${script}`)
+                break;
+            // 93
+            case "g2" || "g3":
+                await ssh.execCommand(`/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -musers -${script}`)
+                break;
             default:
                 break;
         }
