@@ -6,12 +6,26 @@ import moment from 'moment';
 const ssh = new NodeSSH();
 
 
+/*
+ * Sleep function :)
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/*
+ * Checks if "host_id" is a valid machine
+ */
 export function execShellCommand(cmd){
     return new Promise((resolve, reject) => {
         child_process.exec(cmd, (err, stdout, stderr) => {
             if (err) {
                 reject(err);
-            } else {
+            } 
+            else if (stderr) {
+                reject(stderr);
+            }
+            else {
                 resolve(stdout);
             }
         });
@@ -24,7 +38,7 @@ export function execShellCommand(cmd){
 export function checkIfValidMachine(machine){
     if(machine !== "all" && !Object.keys(MACHINE_ARR).includes(machine))
         return ({
-            status: false, data: `Sorry, machine ${machine} does not exist`
+            status: false, data: `Sorry, machine *${machine}* does not exist`
         });
     return ({
         status: true, data: `Machine ${machine} exists`
@@ -35,12 +49,12 @@ export function checkIfValidMachine(machine){
  * Checks if "script" matches to a valid script in the machine
  */
 export function checkIfValidScript(machine, script){
-    if(!(MACHINE_ARR[machine].scripts).includes(script))
+    if((MACHINE_ARR[machine].scripts).includes(script) || script === "all")
         return ({
-            status: false, data: `Script ${script} does not exist`
+            status: true, data: `Script ${script} exists`
         });
     return ({
-        status: true, data: `Script ${script} exists`
+        status: false, data: `Script *${script}* does not exist`
     });
 }
 
@@ -162,10 +176,8 @@ export async function checkRunningScripts(machine){
 /*
  * Reboots specified machine then re-runs scripts on crontab
  */
-// !! Currently not working on sandbox-server :'(
 export async function rebootMachine(machine){
     const { hostname, ip, user, pass } = getCredentials(machine);
-    let ts = moment();
     let response = "";
 
     // Initial SSH to `reboot` machine
@@ -184,26 +196,8 @@ export async function rebootMachine(machine){
         console.log("Disconnected \n");
         ssh.dispose();
     });
-
-
-    // todo: check if reboot was successful using ping, then ssh to machine to confirm if it's up
-    // Second SSH to check if machine is online
-    // await ssh
-    // .connect({
-    //     host: ip,
-    //     username: user,
-    //     password: pass
-    // })
-    // .then(() => {
-    //     console.log("Disconnected \n");
-    //     ssh.dispose();
-    //     ts = moment() - ts;
-    //     response = 
-    //     `${hostname} rebooted in ${ts}
-    //     Status: Active`;
-    // });
     
-    response = `${hostname} rebooted successfully!`;
+    response = `*${hostname}* rebooted successfully!`;
 
     return response;
 }
@@ -253,6 +247,38 @@ export async function killScript(machine, script){
 }
 
 /*
+ * Kill ALL scripts on specified machine
+ */
+export async function killAllScript(machine){
+    const { hostname, ip, user, pass } = getCredentials(machine);
+    let response = "";
+
+    await ssh
+    .connect({
+        host: ip,
+        username: user,
+        password: pass
+    })
+    .then(async() => {
+        console.log(`Connected to ${hostname}!`);
+        await ssh.execCommand("killall screen")
+        .then((resp) => {
+            if(resp.stdout.includes("screen: no process found")){
+                response = `No script(s) running on *${hostname}*`;
+            } else {
+                response = `All scripts on *${hostname}* killed successfully`;
+            }
+        })
+    })
+    .finally(() => {
+        console.log("Disconnected \n");
+        ssh.dispose();
+    });
+
+    return response;
+}
+
+/*
  * Start / Restart running script(s) on specified machine
  */
 export async function startScript(machine, script){
@@ -270,70 +296,152 @@ export async function startScript(machine, script){
         await ssh.execCommand("screen -ls")
         .then((resp) => {
             response = resp.stdout;
-            console.log("screen_output:",response);
+            console.log("screen_output:", response);
         });
     })
     .then(async() => {
+        // NO currently runnning screens:
         if(response.includes("No Sockets found")){
-            response = `No scripts running on ${hostname}. Starting script *${script}*`;
+            response = `No scripts running on *${hostname}*. Starting *${script}*`;
+            await ssh.execCommand(runScreenCommand(hostname, script))
         } else {
-            response = `Restarting script *${script}* on *${hostname}*...`;
+            response = `Starting script *${script}* on *${hostname}*`;
+            console.log(response);
+            await ssh.execCommand(`screen -wipe`)
+            await ssh.execCommand(`screen -S ${script} -Q echo '$PID'`)
+            .then(async(resp) => {
+                console.log("screen_process_id: ", resp.stdout);
+                // Screen DNE
+                if(resp.stdout.includes("No screen session found.")){
+                    // Start new screen
+                    await ssh.execCommand(runScreenCommand(hostname, script))
+                } else {
+                    // Screen exists, restart it
+                    await ssh.execCommand(`screen -S ${resp.stdout} -X quit`)
+                    // Restart script
+                    .then(async() => {
+                        await ssh.execCommand(runScreenCommand(hostname, script));
+                        // await ssh.execCommand(`/usr/bin/screen -dmS ${script} -X quit && screen -dmS ${script}`)
+                    });
+                }
+            }) 
         }
     })
-    .then(async() => {
-        await ssh.execCommand(`screen -wipe`)
-        await ssh.execCommand(`screen -S ${script} -Q echo '$PID'`)
-        .then(async(result) => {
-            console.log("screen_process_id: ", result.stdout);
-
-            await ssh.execCommand(`screen -S ${result.stdout} -X quit`)
-            // Restart script
-    .then(async() => {
-        switch (script) {
-            case "t1":
-                // *Test script p1.py
-                console.log("starting t1");
-                await ssh.execCommand(`screen -dmS ${script} /usr/bin/python /home/pi/t1.py`)
-                break;
-            case "t2":
-                // *Test script p2.py
-                await ssh.execCommand(`screen -dmS ${script} /usr/bin/python /home/pi/t2.py`)
-                break;
-            // Sandbox Server | MIA Server => Highcharts
-            case "highcharts_server":
-                await ssh.execCommand(`screen -dmS ${script} bash -c "highcharts-export-server -enableServer 1"`)
-                break;
-            // Sandbox Server | MIA Server => Flask
-            case "flask_server":
-                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; /home/mia/miniconda3/bin/python run.py -ew"`)
-                break;
-            // Sandbox Server | MIA Server => Celery-Beat
-            case "beat_celery":
-                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; celery beat -A launch_worker.CELERY -l info -eag -er -egd"`)
-                break;
-            // Sandbox Server | MIA Server => Celery-Worker
-            case "worker_celery":
-                await ssh.execCommand(`screen -dmS ${script} bash -c "cd /var/www/flask_server; celery worker -A launch_worker.CELERY -l info -c 8 -eag -ec -er --purge"`)
-                break;
-            // 91, 92
-            case "g5" || "g7" || "g4" || "g6":
-                await ssh.execCommand(`/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -mloggers -${script}`)
-                break;
-            // 93
-            case "g2" || "g3":
-                await ssh.execCommand(`/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -musers -${script}`)
-                break;
-            default:
-                break;
-        }
-        await ssh.execCommand(`screen -dmS ${script} -X quit && screen -dmS ${script}`)
-            .finally(() => {
-                console.log("Disconnected \n");
-                ssh.dispose();
-            });
+    .finally(() => {
+        console.log("Disconnected \n");
+        ssh.dispose();
     });
-        })
-    })
     
     return response;
+}
+
+/*
+ * Start / Restart ALL script(s) on specified machine
+ */
+export async function startAllScript(machine){
+    const { hostname, ip, user, pass } = getCredentials(machine);
+    let response = "";
+
+    await ssh
+    .connect({
+        host: ip,
+        username: user,
+        password: pass
+    })
+    .then(async() => {
+        console.log(`Connected to ${hostname}!`);
+        await ssh.execCommand("killall screen")
+        .then(async(resp) => {
+            if(resp.stdout.includes("screen: no process found")){
+                response = `No script(s) running on *${hostname}*`;
+            } else {
+                response = `All scripts on *${hostname}* killed successfully`;
+            }
+            console.log(response);
+        })
+    })
+    .then(async() => {
+        for(const script of MACHINE_ARR[machine].scripts){   
+            await ssh.execCommand(runScreenCommand(hostname, script));
+            // Wait 5 seconds before executing next script
+            await sleep(5000);
+        }
+    })
+    .finally(() => {
+        console.log("Disconnected \n");
+        ssh.dispose();
+    });
+    
+    response = "Started all scripts successfully!";
+
+    return response;
+}
+
+/*
+ * Contains screen commands per machine
+ */
+export function runScreenCommand(hostname, script){
+    switch (script) {
+        case "t1":
+            // *Test script p1.py, remove on production!
+            console.log("starting t1");
+            return `/usr/bin/screen -dmS ${script} /usr/bin/python /home/pi/t1.py`
+        case "t2":
+            // *Test script p2.py, remove on production!
+            console.log("starting t2");
+            return `/usr/bin/screen -dmS ${script} /usr/bin/python /home/pi/t2.py`
+
+        // Sandbox Server | MIA Server => Highcharts
+        case "highcharts_server":
+            console.log("starting highcharts_server");
+            return `/usr/bin/screen -dmS ${script} bash -c "highcharts-export-server -enableServer 1"`
+
+            // Sandbox Server | MIA Server => Flask
+        case "flask_server":
+            console.log("starting flask_server");
+            if(hostname === "MIA"){
+                return `/usr/bin/screen -dmS ${script} bash -c "cd /var/www/flask_server; /home/mia/miniconda3/bin/python run.py -ew"`
+            } else {
+                return `/usr/bin/screen -dmS ${script} bash -c "cd /var/www/flask_server; /home/sandbox-server/miniconda/bin/python run.py -ew"`
+            }
+
+            // Sandbox Server | MIA Server => Celery-Beat
+        case "beat_celery":
+            console.log("starting beat_celery");
+            return `/usr/bin/screen -dmS ${script} bash -c "cd /var/www/flask_server; celery beat -A launch_worker.CELERY -l info -eag -er -egd"`
+
+            // Sandbox Server | MIA Server => Celery-Worker
+        case "worker_celery":
+            console.log("starting worker_celery");
+            if(hostname === "MIA"){
+                return `/usr/bin/screen -dmS ${script} bash -c "cd /var/www/flask_server; celery worker -A launch_worker.CELERY -l info -c 8 -eag -ec -er --purge`
+            }
+            return `/usr/bin/screen -dmS ${script} bash -c "cd /var/www/flask_server; celery worker -A launch_worker.CELERY -l info -c 8 -eag -ec -er"`
+
+            // 91, 92
+        case "g5" || "g7" || "g4" || "g6":
+            console.log("starting sms loggers");
+            return `/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -mloggers -${script}`
+
+            // 93
+        case "g2" || "g3":
+            console.log("starting sms chatterbox");
+            return `/usr/local/bin/python3.6 /home/pi/dyna3_gsm/utils/watchdog.py -musers -${script}`
+    }
+}
+
+/*
+ * Node ping test
+ */
+export async function checkNetwork(machine){
+    const { hostname, ip } = getCredentials(machine);
+    let response;
+    try {
+        response = await execShellCommand(`ping -c 5 ${ip}`);
+        response = `Network stat from *${hostname}*:\n${response.substring(response.indexOf("5 packets"), response.length)}`;
+    } catch (error) {
+        response = `Network Error: could not ping *${hostname}*`;
+    }
+    
+    return response
 }

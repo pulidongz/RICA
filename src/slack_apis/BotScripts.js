@@ -7,12 +7,14 @@ import {
     checkIfValidScript,
     rebootMachine,
     killScript,
-    startScript, 
+    killAllScript,
+    startScript,
+    startAllScript
 } from "../utils/ShellCommands";
 
 
 export function BotScripts() {
-    app.message(/^(remote-creds).*/, async ({ message, say }) => {
+    app.message(/^(remote-creds|rc).*/, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -40,7 +42,7 @@ export function BotScripts() {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "for more information, please visit: <https://trello.com/c/WeqRFkwK/15-teamviewer-accounts-for-monitoring|Trello>",
+                        "text": "for more information, please visit: <https://trello.com/c/WeqRFkwK/15-teamviewer-accounts-for-monitoring||Trello>",
                     }
                 }
             ],
@@ -51,7 +53,7 @@ export function BotScripts() {
     /*
      * Displays machine credentials
      */
-    app.message(/^(machine-creds).*/, async ({ message, say }) => {
+    app.message(/^(machine-creds|mc).*/, async ({ message, say }) => {
         let machine = message.text.trim().split(" ")[1];
         let isValid = checkIfValidMachine(machine);
 
@@ -100,7 +102,7 @@ export function BotScripts() {
     /*
      * Checks if script(s) are running on the machine
      */
-    app.message(/^(check-script).*/, async ({ message, say }) => {
+    app.message(/^(check-script|cs).*/, async ({ message, say }) => {
         let machine = message.text.trim().split(" ")[1];
         let isValid = checkIfValidMachine(machine);
 
@@ -199,8 +201,9 @@ export function BotScripts() {
     /*
      * Terminate specified script runnning on current machine
      */
-    app.message(/^(kill-script).*/, async ({ message, say }) => {
+    app.message(/^(kill-script|ks).*/, async ({ message, say }) => {
         let [command, machine, script]= message.text.trim().split(" ");
+        let response;
 
         console.log(command, machine, script);
 
@@ -221,10 +224,13 @@ export function BotScripts() {
             });
         } else {
             try {
-                const result = await killScript(machine, script);
-                console.log('RESULT: ', result);
-                await say(result);
-                
+                if(script === "all"){
+                    response = await killAllScript(machine);
+                } else {
+                    response = await killScript(machine, script);
+                }
+                await say(response);
+
             } catch (error) {
                 console.log(error);
                 await say({
@@ -246,9 +252,9 @@ export function BotScripts() {
     /*
      * Starts specified script on specified machine
      */
-    app.message(/^(start-script).*/, async ({ message, say }) => {
+    app.message(/^(start-script|ss|start).*/, async ({ message, say }) => {
         let [command, machine, script]= message.text.trim().split(" ");
-
+        let response;
         console.log(command, machine, script);
 
         let isValid = checkIfValidMachine(machine) && checkIfValidScript(machine, script);
@@ -268,9 +274,12 @@ export function BotScripts() {
             });
         } else {
             try {
-                const result = await startScript(machine, script);
-                console.log(result);
-                await say(result);
+                if(script === "all"){
+                    response = await startAllScript(machine);
+                } else {
+                    response = await startScript(machine, script);
+                }
+                await say(response);
                 
             } catch (error) {
                 console.log(error);

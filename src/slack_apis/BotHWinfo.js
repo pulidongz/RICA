@@ -1,3 +1,3 @@
-export default function HWInfo() {
+export function HWInfo() {
     
 }

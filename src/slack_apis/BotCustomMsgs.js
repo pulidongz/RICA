@@ -3,7 +3,7 @@ import { app } from "../..";
 export function CustomMsgs(){
 
     // Answers to 'hello' messages
-    app.message(/^(hi|hello|hey|oist|oi|ei).*/, async ({ message, say }) => {
+    app.message(/^(hi|hello|hey|oist|oi|ei).*/i, async ({ message, say }) => {
         await say({
             blocks: [
             {
@@ -19,14 +19,30 @@ export function CustomMsgs(){
     });
 
     // Answers to 'hello' messages
-    app.message(/^(help|tulong|how|elp|info).*/, async ({ message, say }) => {
+    app.message(/^(thanks|ty|thank you).*/i, async ({ message, say }) => {
+        await say({
+            blocks: [
+            {
+                "type": "section",
+                "text": {
+                "type": "mrkdwn",
+                "text": `You're welcome <@${message.user}>! :+1: Glad I could be of assistance!`
+                },
+            }
+            ],
+            text: `Hey there <@${message.user}>! :wave:`
+        });
+    });
+
+    // Answers to 'hello' messages
+    app.message(/^(help|tulong|how|elp|info).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": "Essential Bot Commands",
+                        "text": "Bot Commands",
                         "emoji": true
                     }
                 },
@@ -47,6 +63,10 @@ export function CustomMsgs(){
                         {
                             "type": "mrkdwn",
                             "text": ":small_orange_diamond: *remote-creds*\n-Displays AnyDesk / Teamviewer credentials of the specified host",
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": ":small_orange_diamond: *ping [host_id]*\n-Check network statistics and latency of the specified host",
                         },
                         {
                             "type": "mrkdwn",
@@ -120,7 +140,7 @@ export function CustomMsgs(){
     });
 
     // Answers to SI Google Drive inquiry
-    app.message(/^(gdrive-si).*/, async ({ message, say }) => {
+    app.message(/^(gdrive-si).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -136,7 +156,7 @@ export function CustomMsgs(){
     });
 
     // Answers to 'credential' inquiry
-    app.message(/^(trello-creds).*/, async ({ message, say }) => {
+    app.message(/^(trello-creds).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -159,7 +179,7 @@ export function CustomMsgs(){
     });
 
     // Answers to Trello SI Dev 'tickets' inquiry
-    app.message(/^(trello-dev).*/, async ({ message, say }) => {
+    app.message(/^(trello-dev).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -175,7 +195,7 @@ export function CustomMsgs(){
     });
 
     // Answers to Trello SI 'documentation' inquiry
-    app.message(/^(trello-docu).*/, async ({ message, say }) => {
+    app.message(/^(trello-docu).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -191,7 +211,7 @@ export function CustomMsgs(){
     });
 
     // Answers to Trello 'monitoring operations' inquiry
-    app.message(/^(trello-mo).*/, async ({ message, say }) => {
+    app.message(/^(trello-mo).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -207,7 +227,7 @@ export function CustomMsgs(){
     });
 
     // Answers to Trello CBEWSL inquiry
-    app.message(/^(trello-cbewsl).*/, async ({ message, say }) => {
+    app.message(/^(trello-cbewsl).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -223,7 +243,7 @@ export function CustomMsgs(){
     });
 
     // Answers to Trello Main inquiry
-    app.message(/^(trello-main).*/, async ({ message, say }) => {
+    app.message(/^(trello-main).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {

@@ -20,7 +20,7 @@ export const MACHINE_ARR = {
       scripts: ["t1", "t2"]
     },
     "110":{
-      scripts: ["flask_server", "beat_celery", "worker_celery", "highcharts_server"]
+      scripts: ["highcharts_server", "flask_server", "beat_celery", "worker_celery"]
     },
     "111":{
       scripts: ["olivia-screen"]
@@ -29,7 +29,7 @@ export const MACHINE_ARR = {
     //   scripts: []
     // },
     "253":{
-      scripts: ["flask_server", "beat_celery", "worker_celery", "highcharts_server"]
+      scripts: [ "highcharts_server", "flask_server", "beat_celery", "worker_celery"]
     },
     
   }

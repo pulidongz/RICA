@@ -1,6 +1,10 @@
 import { NodeSSH } from 'node-ssh';
 import { CustomMsgs } from './src/slack_apis/BotCustomMsgs';
 import { BotScripts } from './src/slack_apis/BotScripts';
+import { Network } from './src/slack_apis/BotNetwork';
+import { Memcache } from './src/slack_apis/BotMemcache';
+import { HWInfo } from './src/slack_apis/BotHWinfo';
+
 import dotenv from 'dotenv';
 
 dotenv.config({path: '.env'});
@@ -20,9 +24,12 @@ export const ssh = new NodeSSH();
 
 CustomMsgs();
 BotScripts();
+Network();
+Memcache();
+HWInfo();
 
 (async () => {
-  // Start app
+  // Start APP
   await app.start();
 
   console.log(`${process.env.BOT_NAME} is running on port ${process.env.PORT}`);

@@ -1,6 +1,6 @@
 import { app } from "../..";
 
 
-export default function Memcache() {
+export function Memcache() {
     
 }
