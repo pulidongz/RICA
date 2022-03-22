@@ -14,7 +14,7 @@ import {
 
 
 export function BotScripts() {
-    app.message(/^(remote-creds|rc).*/, async ({ message, say }) => {
+    app.message(/^(remote-creds|rc).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
                 {
@@ -53,8 +53,8 @@ export function BotScripts() {
     /*
      * Displays machine credentials
      */
-    app.message(/^(machine-creds|mc).*/, async ({ message, say }) => {
-        let machine = message.text.trim().split(" ")[1];
+    app.message(/^(machine-creds|mc).*/i, async ({ message, say }) => {
+        let machine = message.text.trim().toLowerCase().split(" ")[1];
         let isValid = checkIfValidMachine(machine);
 
         if(!isValid.status){
@@ -102,8 +102,8 @@ export function BotScripts() {
     /*
      * Checks if script(s) are running on the machine
      */
-    app.message(/^(check-script|cs).*/, async ({ message, say }) => {
-        let machine = message.text.trim().split(" ")[1];
+    app.message(/^(check-script|cs).*/i, async ({ message, say }) => {
+        let machine = message.text.trim().toLowerCase().split(" ")[1];
         let isValid = checkIfValidMachine(machine);
 
         if(!isValid.status){
@@ -151,8 +151,8 @@ export function BotScripts() {
     /*
      * Reboot specified machine(s)
      */
-    app.message(/^(reboot).*/, async ({ message, say }) => {
-        let machine = message.text.trim().split(" ")[1];
+    app.message(/^(reboot).*/i, async ({ message, say }) => {
+        let machine = message.text.trim().toLowerCase().split(" ")[1];
         let isValid = checkIfValidMachine(machine);
         // let isValid = rebootMachine(machine);
 
@@ -201,13 +201,13 @@ export function BotScripts() {
     /*
      * Terminate specified script runnning on current machine
      */
-    app.message(/^(kill-script|ks).*/, async ({ message, say }) => {
-        let [command, machine, script]= message.text.trim().split(" ");
+    app.message(/^(kill-script|ks).*/i, async ({ message, say }) => {
+        let [command, machine, script]= message.text.trim().toLowerCase().split(" ");
         let response;
 
         console.log(command, machine, script);
 
-        let isValid = checkIfValidMachine(machine);
+        let isValid = checkIfValidMachine(machine) && checkIfValidScript(machine, script);;
 
         if(!isValid.status){
             await say({
@@ -252,8 +252,8 @@ export function BotScripts() {
     /*
      * Starts specified script on specified machine
      */
-    app.message(/^(start-script|ss|start).*/, async ({ message, say }) => {
-        let [command, machine, script]= message.text.trim().split(" ");
+    app.message(/^(start-script|ss|start).*/i, async ({ message, say }) => {
+        let [command, machine, script]= message.text.trim().toLowerCase().split(" ");
         let response;
         console.log(command, machine, script);
 
