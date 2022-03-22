@@ -14,6 +14,9 @@ import {
 
 
 export function BotScripts() {
+    /*
+     * Anydesk/Teamviewer credentials
+     */
     app.message(/^(remote-creds|rc).*/i, async ({ message, say }) => {
         await say({
             "blocks": [
@@ -123,11 +126,11 @@ export function BotScripts() {
             try {
                 if(machine === "all"){
                     for(const m of Object.keys(MACHINE_ARR)){   
-                        const result = await checkRunningScripts(m);
+                        const result = await checkRunningScripts(message.channel. m);
                         await say(result);
                     }
                 } else {
-                    const result = await checkRunningScripts(machine);
+                    const result = await checkRunningScripts(message.channel, machine);
                     await say(result);
                 }
             } catch (error) {

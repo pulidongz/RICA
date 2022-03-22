@@ -1,7 +1,9 @@
 import { MACHINE_ARR } from "../../instance/config";
+import { app } from "../..";
 import child_process from 'child_process';
 import { NodeSSH } from "node-ssh";
 import moment from 'moment';
+
 
 const ssh = new NodeSSH();
 
@@ -11,6 +13,19 @@ const ssh = new NodeSSH();
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function publishMessage(channel, message) {
+    try {
+      const result = await app.client.chat.postMessage({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: channel,
+        text: message
+      });
+    }
+    catch (error) {
+      console.error(error);
+    }
 }
 
 /*
@@ -139,7 +154,7 @@ export function getCredentials(machine){
 /*
  * Checks all / specific runnning scripts on the specified machine
  */
-export async function checkRunningScripts(machine){
+export async function checkRunningScripts(channel, machine){
     const { hostname, ip, user, pass } = getCredentials(machine);
     let response = "";
 
@@ -153,8 +168,8 @@ export async function checkRunningScripts(machine){
         password: pass
     })
     .then(async() => {
+        await publishMessage(channel, `Checking scripts on *${hostname}*`);
         console.log(`Connected to ${hostname}!`);
-
         await ssh.execCommand(`screen -ls`)
         .then((result) => {
             if(result.stdout.includes("No Sockets found")){
